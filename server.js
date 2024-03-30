@@ -6,12 +6,18 @@ const Visit = require("./models/visitsModel");
 dotenv.config();
 connectDB();
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 app.use(cors());
+app.get("/", (req, res) => {
+  res.send("Hello World! This is the backend server of GSP");
+});
 app.post("/visit", async (req, res) => {
   console.log(req.body);
+  if (!req.body.data) {
+    res.status(400).send("No data sent");
+    return;
+  }
   const { webSiteName, count } = req.body.data;
   const visit = await Visit.findOne({ webSiteName });
   if (visit) {
@@ -28,8 +34,14 @@ app.post("/visit", async (req, res) => {
   }
   res.send("Visit logged");
 });
-app.get("/", (req, res) => {
-  res.send("API is running...");
+app.get("/visit/:webSiteName", async (req, res) => {
+  const webSiteName = req.params.webSiteName;
+  const visit = await Visit.findOne({ webSiteName });
+  if (visit) {
+    res.send(visit);
+  } else {
+    res.send("No visit found");
+  }
 });
 const PORT = process.env.PORT || 5001;
 const server = app.listen(PORT, () => {
